@@ -2,7 +2,7 @@
 
 A simple football scoreboard application built with React, TypeScript, and Tailwind CSS.
 
-## Features
+## Feature
 
 - Live score tracking for home and away teams
 - Possession indicator
