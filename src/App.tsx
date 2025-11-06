@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Score, Team, GameStatus } from './types';
 import Scoreboard from "./components/Scoreboard";
 import Controls from "./components/Controls";
@@ -8,6 +8,24 @@ export default function App() {
   const [possession, setPossession] = useState<Team>("HOME");
   const [quarter, setQuarter] = useState<1|2|3|4>(1);
   const [status, setStatus] = useState<GameStatus>("IN_PROGRESS")
+
+  useEffect(() => {
+    async function fetchGame() {
+      try {
+        console.log("Fetching game data...")
+        const res = await fetch("http://localhost:4000/api/game");
+        console.log("Response Status:", res.status)
+        const data = await res.json();
+        console.log("Game Data", data)
+        setScore(data.score);
+        setPossession(data.possession);
+        setStatus(data.status);
+      } catch (err) {
+        console.error("Backend not reachable", err);
+      }
+    }
+    fetchGame();
+  },[])
 
   function handleScore(team: Team, pts: number) {
     if (status === 'FINAL') return;

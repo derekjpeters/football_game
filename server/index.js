@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import gameRoutes from "./routes/gameRoutes.js"
 
 const app = express ();
 const PORT = 4000;
@@ -8,10 +9,8 @@ const PORT = 4000;
 app.use(cors()); //allow our middleware to use CORS
 app.use(express.json()); //parse incoming JSON bodies
 
-//Route
-app.get("/", (req, res) => {
-    res.send("Football Game API is running")
-});
+//Routes
+app.use("/api/game", gameRoutes)
 
 //Start Server
 app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
