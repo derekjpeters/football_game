@@ -64,6 +64,7 @@ router.post("/reset", (req, res) => {
 		status: "IN_PROGRESS",
         yardline: 25,
         homeTeamName: gameState.homeTeamName,
+		awayTeamName: gameState.awayTeamName,
 	};
 	res.json({ message: "Game Reset", gameState });
 });
@@ -106,8 +107,4 @@ router.post("/users", (req, res) => {
             "password": AZ123215647-************2@@@@@@@$#$%#%$^$%^%$&$ABC
         }
     }
-
-
-
-
 */
