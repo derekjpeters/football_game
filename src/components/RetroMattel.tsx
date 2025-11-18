@@ -4,7 +4,6 @@ import useInterval from "../hooks/useInterval";
 
 type Lane = 0 | 1 | 2 | 3 | 4;
 
-
 interface Props {
 	onGain: (yards: number) => void; // called when player reaches far right
 	onHit: (yardsPenalty: number) => void; // called on collision
@@ -69,44 +68,87 @@ export default function RetroMattel({ onGain, onHit, speedMs = 250 }: Props) {
 		spawn();
 	}, [lane, col, onHit, onGain, spawn]);
 
-    useInterval(() => running && step(), running ? speedMs : null);
+	useInterval(() => running && step(), running ? speedMs : null);
 
-    useEffect(() => {
-        const onKey = (e: KeyboardEvent) => {
-            if (e.key === "ArrowUp") setLane((l) => (l > 0 ? ((l-1) as Lane) : l))
-            if (e.key === "ArrowDown") setLane((l) => (l < 4 ? ((l+1) as Lane): l));
-            if (e.key === " ") setRunning((r) => !r);
-            if (e.key === "ArrowRight") setCol((c) => Math.min(COLS -1, c + 1));
-        };
-        window.addEventListener("keydown", onKey)
-        return () => window.removeEventListener("keydown", onKey);
-    }, [])
+	// Keyboard controls
+	useEffect(() => {
+		const onKey = (e: KeyboardEvent) => {
+			if (e.key === "ArrowUp") setLane((l) => (l > 0 ? ((l - 1) as Lane) : l));
+			if (e.key === "ArrowDown")
+				setLane((l) => (l < 4 ? ((l + 1) as Lane) : l));
+			if (e.key === " ") setRunning((r) => !r);
+			if (e.key === "ArrowRight") setCol((c) => Math.min(COLS - 1, c + 1)); // manual nudge
+		};
+		window.addEventListener("keydown", onKey);
+		return () => window.removeEventListener("keydown", onKey);
+	}, []);
 
-    const grid = useMemo(() => {
-        //this will build our 5x16 grid
-        const g = Array.from({ length:5 }, () => Array(COLS).fill(false));
-        defenders.forEach((d) => {
-            if (d.lane >= 0 && d.lane <= 4 && d.col >=0 && d.col < COLS) g[d.lane] [d.col] = true;
-        })
-        return g;
-    }, [defenders]);
+	const grid = useMemo(() => {
+		// build a simple 5x16 grid of booleans for LED rendering
+		const g = Array.from({ length: 5 }, () => Array(COLS).fill(false));
+		defenders.forEach((d) => {
+			if (d.lane >= 0 && d.lane <= 4 && d.col >= 0 && d.col < COLS)
+				g[d.lane][d.col] = true;
+		});
+		return g;
+	}, [defenders]);
 
-    return (
-        <div className="w-full max-w-xl bg-black-rounded-2xl p-4 shadow relative">
-            <div className="text-center text-green-400 text-sm mb-2">Classic Game Mode{running ? "●" : "■"}</div>
-            <div className="grid grid-rows-5 gap-2">
-                {Array.from({ length:COLS }).map((_, c)=> {
-                    const isPlayer = r === lane && c === col;
-                    const isDef = grid [r] [c];
-                    const on = isPlayer || isDef;
-                    return (
-                        <div 
-                        key = {c}
-                        className="{`w-3 h-3 rounded-full ${
+	return (
+		<div className="w-full max-w-xl bg-black rounded-2xl p-4 shadow relative">
+			<div className="text-center text-green-400 text-sm mb-2">
+				Mattel-Style Mode {running ? "●" : "■"}
+			</div>
+			<div className="grid grid-rows-5 gap-2">
+				{LANES.map((r) => (
+					<div key={r} className="grid grid-cols-16 gap-2">
+						{Array.from({ length: COLS }).map((_, c) => {
+							const isPlayer = r === lane && c === col;
+							const isDef = grid[r][c];
+							const on = isPlayer || isDef;
+							return (
+								<div
+									key={c}
+									className={`w-3 h-3 rounded-full ${
+										isPlayer
+											? "bg-red-500 shadow-[0_0_8px_rgba(255,0,0,0.8)]"
+											: isDef
+											? "bg-amber-400 shadow-[0_0_6px_rgba(255,200,0,0.6)]"
+											: "bg-gray-800"
+									}`}
+								/>
+							);
+						})}
+					</div>
+				))}
+			</div>
 
-                        }`}"
-                    )
-                })}
-            </div>
-        </div> 
-    )
+			{/* On-screen controls for mobile */}
+			<div className="flex justify-center gap-2 mt-3">
+				<button
+					className="px-3 py-1 text-xs rounded bg-slate-700 text-white"
+					onClick={() => setLane((l) => (l > 0 ? ((l - 1) as Lane) : l))}
+				>
+					▲
+				</button>
+				<button
+					className="px-3 py-1 text-xs rounded bg-slate-700 text-white"
+					onClick={() => setLane((l) => (l < 4 ? ((l + 1) as Lane) : l))}
+				>
+					▼
+				</button>
+				<button
+					className="px-3 py-1 text-xs rounded bg-slate-700 text-white"
+					onClick={() => setRunning((r) => !r)}
+				>
+					{running ? "Pause" : "Play"}
+				</button>
+				<button
+					className="px-3 py-1 text-xs rounded bg-slate-700 text-white"
+					onClick={() => setCol((c) => Math.min(COLS - 1, c + 1))}
+				>
+					▶︎
+				</button>
+			</div>
+		</div>
+	);
+}
