@@ -104,7 +104,7 @@ export default function RetroMattel({ onGain, onHit, speedMs = 250 }: Props) {
 						{Array.from({ length: COLS }).map((_, c) => {
 							const isPlayer = r === lane && c === col;
 							const isDef = grid[r][c];
-							const on = isPlayer || isDef;
+							//const on = isPlayer || isDef;
 							return (
 								<div
 									key={c}
